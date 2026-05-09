@@ -62,13 +62,13 @@ MyAwesomeApp
 
 ### Windows (Git Bash)
 1. Create a folder for your scripts, e.g., C:\scripts.
-2. Move mtree.sh into that folder.
+2. Move ftree file into that folder.
 3. Add C:\scripts to your Windows Environment Variables (Path).
 4. Restart your terminal.
 
 ### macOS and Linux
 1. Create a bin directory: mkdir -p ~/bin
-2. Move the script: mv mtree.sh ~/bin/mtree && chmod +x ~/bin/mtree
+2. Move the script: mv ftree ~/bin/Ftree && chmod +x ~/bin/Ftree
 3. Add export PATH="$HOME/bin:$PATH" to your .zshrc or .bashrc.
 4. Refresh: source ~/.zshrc (or .bashrc).
 
