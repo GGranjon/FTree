@@ -1,41 +1,101 @@
 #!/bin/bash
 
-# Function to traverse directories
+# Default values
+max_depth=999
+target_dir="."
+show_absolute=false
+ignore_pattern=""
+
+# Help function
+show_help() {
+    echo "Usage: mtree [OPTIONS]"
+    echo ""
+    echo "A lightweight directory tree visualizer."
+    echo ""
+    echo "Options:"
+    echo "  -d DEPTH    Limit the recursion depth (e.g., -d 2)"
+    echo "  -p PATH     The directory to start from (default: current directory)"
+    echo "  -a          Show absolute path in the header instead of folder name"
+    echo "  -i PATTERN  Regex pattern to ignore (e.g., -i \"node_modules|.git\")"
+    echo "  -h          Show this help menu"
+    echo ""
+    echo "Examples:"
+    echo "  mtree -d 2 -i \"node_modules\""
+    echo "  mtree -p /c/Users/Documents -a"
+    exit 0
+}
+
+# Parse options
+while getopts "d:p:ai:h" opt; do
+  case $opt in
+    d) max_depth=$OPTARG ;;
+    p) target_dir=$OPTARG ;;
+    a) show_absolute=true ;;
+    i) ignore_pattern=$OPTARG ;;
+    h) show_help ;;
+    *) show_help ;; # Show help on invalid flags
+  esac
+done
+
+# Ensure the directory exists
+if [ ! -d "$target_dir" ]; then
+    echo "Error: Directory '$target_dir' does not exist."
+    exit 1
+fi
+
 walk_dir() {
     local directory="$1"
     local prefix="$2"
+    local current_depth="$3"
 
-    # List all files and directories, excluding '.' and '..'
-    # Use a loop to handle spaces in filenames
-    local entries=("$directory"/*)
-    
-    # Check if directory is empty
-    if [ ! -e "${entries[0]}" ]; then
+    if [ "$current_depth" -ge "$max_depth" ]; then
+        if [ "$(ls -A "$directory" 2>/dev/null)" ]; then
+            echo "${prefix}└── ..."
+        fi
         return
     fi
 
-    local count=${#entries[@]}
+    shopt -s nullglob dotglob
+    local entries=("$directory"/*)
+    shopt -u nullglob dotglob
+    
+    if [ ${#entries[@]} -eq 0 ]; then return; fi
+
+    local filtered_entries=()
+    for entry in "${entries[@]}"; do
+        local name=$(basename "$entry")
+        if [[ -n "$ignore_pattern" && "$name" =~ $ignore_pattern ]]; then
+            continue
+        fi
+        filtered_entries+=("$entry")
+    done
+
+    local count=${#filtered_entries[@]}
     local i=0
 
-    for entry in "${entries[@]}"; do
+    for entry in "${filtered_entries[@]}"; do
         i=$((i + 1))
         local name=$(basename "$entry")
         
-        # Determine if this is the last item in the current folder
         if [ $i -eq $count ]; then
             echo "${prefix}└── $name"
-            # If it's a directory, recurse with a blank prefix
-            [ -d "$entry" ] && walk_dir "$entry" "${prefix}    "
+            if [ -d "$entry" ]; then
+                walk_dir "$entry" "${prefix}    " $((current_depth + 1))
+            fi
         else
             echo "${prefix}├── $name"
-            # If it's a directory, recurse with a vertical bar prefix
-            [ -d "$entry" ] && walk_dir "$entry" "${prefix}│   "
+            if [ -d "$entry" ]; then
+                walk_dir "$entry" "${prefix}│   " $((current_depth + 1))
+            fi
         fi
     done
 }
 
-# Start the script
-target_dir="${1:-.}" # Default to current directory if no argument is provided
+# Header Logic
+if [ "$show_absolute" = true ]; then
+    echo "$(cd "$target_dir" && pwd)"
+else
+    echo "$(basename "$(cd "$target_dir" && pwd)")"
+fi
 
-echo "$target_dir"
-walk_dir "$target_dir" ""
+walk_dir "$target_dir" "" 0
