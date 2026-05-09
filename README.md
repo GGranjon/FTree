@@ -28,7 +28,7 @@ ftree
 | -p | **Path** : Sets the target directory, defaults to . | ftree -p ./src |
 | -d | **Depth** : Limits how many levels deep to traverse, defaults to 6 | ftree -d 2 |
 | -i | **Ignore** : A Regex pattern to exclude files/folders, nothing is ignored by default | ftree -i "node_modules|\.env" |
-| -a | **Absolute** : Shows absolute path in header | ftree -a |
+| -a | **Absolute** : Shows absolute path in header, false by default, it prints the current folder name | ftree -a |
 | -h | **Help** : Displays the help menu | ftree -h |
 
 ### Example
