@@ -68,7 +68,7 @@ MyAwesomeApp
 
 ### macOS and Linux
 1. Create a bin directory: mkdir -p ~/bin
-2. Move the script: mv ftree ~/bin/Ftree && chmod +x ~/bin/Ftree
+2. Move the script: mv ftree ~/bin/ftree && chmod +x ~/bin/ftree
 3. Add export PATH="$HOME/bin:$PATH" to your .zshrc or .bashrc.
 4. Refresh: source ~/.zshrc (or .bashrc).
 
